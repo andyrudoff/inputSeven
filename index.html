@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--
+    SPDX-License-Identifier: MIT
+
+    Copyright 2022, Andy Rudoff. All rights reserved.
+
+    index.html -- example of how to use inputSeven
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-title" content="inputSeven" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="stylesheet" href="css/inputSeven.css" />
+    <title>inputSeven</title>
+    <script src="js/inputSeven.js"></script>
+    <style>
+body {
+    background: #fafffa;
+    font-family: sans-serif;
+    font-size: 20px;
+}
+#content {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh; /* fallback */
+    height: calc(var(--vh, 1vh) * 100);
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+#output {
+    width: 80%;
+    height: 10em;
+    background-color: lightyellow;
+    overflow-y: scroll;
+    text-transform: uppercase;
+}
+
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h3>inputSeven Test</h3>
+
+        <div id="output"></div>
+
+        <div id="my-input" class="input-seven"></div>
+    </div>
+
+    <script>
+        const letters = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g' ];
+        const $output = document.getElementById('output');
+        inputSeven('my-input', letters, (word) => {
+            $output.appendChild(document.createTextNode(word + ' '));
+        });
+    </script>
+</body>
+</html>
