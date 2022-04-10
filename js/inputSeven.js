@@ -250,4 +250,90 @@ function inputSeven(id, letters, onWord) {
         down = true;
         addXY(xy.x, xy.y);
     });
+
+    //
+    // support using a device with a physical keyboard, where
+    // used/unallowed characters are ignored and space bar or
+    // return ends the word.  also left arrow and backspace will
+    // delete the last character input.
+    //
+
+    let keyboardInputCount = 0;
+
+    const keyboardInput = function(c) {
+        //console.log(`keyboardInput: ${c}`);
+        if (keyboardInputCount === 0) {
+            resetWord();    // beginning a word
+        }
+        for (let i = 0; i < 7; i++) {
+            if (letters[i] === c && !used[i]) {
+                addLetter(i);
+                keyboardInputCount++;
+            }
+        }
+    };
+    const keyboardDelete = function() {
+        //console.log(`keyboardDelete`);
+        if (keyboardInputCount === 0) {
+            return;
+        }
+        // reset all the state and re-enter everything but the last letter
+        let entered = wordSoFar;
+        let wantCount = keyboardInputCount - 1;
+        down = false;
+        used = [ false, false, false, false, false, false, false ];
+        opsLayer1 = [];
+        wordSoFar = '';
+        ctx1.clearRect(0, 0, $layer1.width, $layer1.height);
+        resetWord();
+        keyboardInputCount = 0;
+        for (let i = 0; i < wantCount; i++) {
+            keyboardInput(entered[i]);
+        }
+    };
+    const keyboardEnd = function() {
+        //console.log(`keyboardEnd`);
+        endWord();
+        keyboardInputCount = 0;
+    };
+
+	document.addEventListener('keypress', function(event) {
+        if (document.getElementById(id) === null) {
+            return; // widget went away
+        }
+        //console.log(`keypress ${event.which}`);
+		if (event.which >= 65 && event.which <= 90) {
+            // upper case letter
+			keyboardInput(String.fromCharCode(event.which).toLowerCase());
+			event.preventDefault();
+        } else if (event.which >= 97 && event.which <= 122) {
+            // lower case letter
+			keyboardInput(String.fromCharCode(event.which));
+			event.preventDefault();
+		} else if (event.which === 13 || event.which === 32) {
+	 		// return or space bar
+	 		keyboardEnd();
+			event.preventDefault();
+		} else if (event.which === 45) {
+	 		// '-' erases
+	 		keyboardDelete();
+			event.preventDefault();
+	 	}
+
+	});
+
+	// left arrow and delete keys
+	document.addEventListener('keydown', function(event) {
+        if (document.getElementById(id) === null) {
+            return; // widget went away
+        }
+        //console.log(`keydown ${event.which}`);
+		switch (event.which) {
+		case 8: // delete
+		case 37: // left
+			keyboardDelete();
+            event.preventDefault();
+		break;
+        }
+	});
 }
