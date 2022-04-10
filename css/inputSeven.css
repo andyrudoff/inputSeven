@@ -1,27 +1,30 @@
 .input-seven {
     display: grid;
-    width: 400px;
-    min-width: 400px;
-    max-width: 400px;
-    height: 500px;
-    min-height: 500px;
-    max-height: 500px;
+    justify-content: center;
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    height: 250px;
+    min-height: 250px;
+    max-height: 250px;
 }
 #input-seven-layer0 {
     grid-area: 2 / 1;
+    justify-self: center;
     z-index: 1;
 }
 #input-seven-layer1 {
     grid-area: 2 / 1;
+    justify-self: center;
     z-index: 2;
 }
 #input-seven-word {
     grid-area: 1 / 1;
-    font-size: 22pt;
-    width: 400px;
-    height: 2em;
-    padding-top: .9em;
-    margin-top: .2em;
+    font-size: 20pt;
+    width: 200px;
+    height: 1.5em;
+    padding-top: .6em;
+    margin-top: .1em;
     background: rgba(200, 128, 255, 0.3);
     border-radius: 25px;
     text-align: center;

@@ -4,8 +4,8 @@ function inputSeven(id, letters, onWord) {
     const $inputSeven = document.getElementById(id);
     $inputSeven.innerHTML = `
 <div id="input-seven-word"></div><br>
-<canvas id="input-seven-layer0" width="400" height="400"></canvas>
-<canvas id="input-seven-layer1" width="400" height="400"></canvas>
+<canvas id="input-seven-layer0" width="200" height="200"></canvas>
+<canvas id="input-seven-layer1" width="200" height="200"></canvas>
 `;
     const $word = document.getElementById('input-seven-word');
     const $layer0 = document.getElementById('input-seven-layer0');
@@ -23,13 +23,13 @@ function inputSeven(id, letters, onWord) {
     drawLetters(ctx0, radius, letters);
 
     const loc = [
-        { x: 200, y: 54 },   // letter 0
-        { x: 312, y: 108 },  // letter 1
-        { x: 342, y: 228 },  // letter 2
-        { x: 262, y: 326 },  // letter 3
-        { x: 139, y: 326 },  // letter 4
-        { x: 60, y: 228 },   // letter 5
-        { x: 88, y: 108 },   // letter 6
+        { x: 101, y: 27 },   // letter 0
+        { x: 157, y: 54 },   // letter 1
+        { x: 171, y: 114 },  // letter 2
+        { x: 131, y: 163 },  // letter 3
+        { x: 70, y: 164 },   // letter 4
+        { x: 31, y: 115 },   // letter 5
+        { x: 45, y: 54 },    // letter 6
     ];
 
     const mouseXY = function(e) {
@@ -50,7 +50,7 @@ function inputSeven(id, letters, onWord) {
         console.log(`letter ${letters[idx]}`);
         const xy = loc[idx];
         ctx1.beginPath();
-        ctx1.arc(xy.x, xy.y, 25, 0, 2*Math.PI);
+        ctx1.arc(xy.x, xy.y, 15, 0, 2*Math.PI);
         ctx1.fillStyle = 'rgba(200, 128, 255, 0.3)';
         ctx1.fill();
         wordSoFar += letters[idx];
@@ -61,8 +61,8 @@ function inputSeven(id, letters, onWord) {
     const addXY = function(x, y) {
         for (var i = 0; i < 7; i++) {
             const xy = loc[i];
-            if (x > xy.x - 26 && x < xy.x + 26 &&
-                y > xy.y - 26 && y < xy.y + 26) {
+            if (x > xy.x - 18 && x < xy.x + 18 &&
+                y > xy.y - 18 && y < xy.y + 18) {
                 addLetter(i);
                 return;
             }
