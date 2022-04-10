@@ -269,6 +269,7 @@ function inputSeven(id, letters, onWord) {
             if (letters[i] === c && !used[i]) {
                 addLetter(i);
                 keyboardInputCount++;
+                break;
             }
         }
     };
