@@ -15,7 +15,10 @@ function inputSeven(id, letters, onWord) {
     let radius = $layer0.height / 2;
     let down = false;
     let used = [ false, false, false, false, false, false, false ];
+    let opsLayer1 = [];
     let wordSoFar = '';
+    let lastX;
+    let lastY;
 
     ctx0.translate(radius, radius);
     radius = radius * 0.90
@@ -42,17 +45,43 @@ function inputSeven(id, letters, onWord) {
         }
     };
 
-    const addLetter = function(idx) {
-        if (used[idx]) {
-            return;
+    const execute = function(op) {
+		switch(op.what) {
+		case 'circle':
+            ctx1.beginPath();
+            ctx1.arc(op.x, op.y, 15, 0, 2 * Math.PI);
+            ctx1.fillStyle = 'rgba(200, 128, 255, 0.3)';
+            ctx1.fill();
+            break;
+        case 'line':
+            ctx1.beginPath();
+            ctx1.strokeStyle = 'rgba(200, 128, 255, 0.3)';
+            ctx1.lineWidth = '15';
+            ctx1.moveTo(op.fromX, op.fromY);
+            ctx1.lineTo(op.toX, op.toY);
+            ctx1.stroke();
+            break;
         }
+
+    };
+
+    const logAndExecute = function(op) {
+        opsLayer1.push(op);
+        execute(op);
+    };
+
+    const redraw = function() {
+        ctx1.clearRect(0, 0, $layer1.width, $layer1.height);
+        for (const op of opsLayer1) {
+            execute(op);
+        }
+    };
+
+    const addLetter = function(idx) {
         used[idx] = true;
         console.log(`letter ${letters[idx]}`);
         const xy = loc[idx];
-        ctx1.beginPath();
-        ctx1.arc(xy.x, xy.y, 15, 0, 2*Math.PI);
-        ctx1.fillStyle = 'rgba(200, 128, 255, 0.3)';
-        ctx1.fill();
+        logAndExecute({ what: 'circle', x: xy.x, y: xy.y });
         wordSoFar += letters[idx];
         console.log(`addLetter, now word is: ${wordSoFar}`);
         $word.innerHTML = wordSoFar;
@@ -60,12 +89,30 @@ function inputSeven(id, letters, onWord) {
 
     const addXY = function(x, y) {
         for (var i = 0; i < 7; i++) {
+            if (used[i]) {
+                continue;
+            }
             const xy = loc[i];
             if (x > xy.x - 18 && x < xy.x + 18 &&
                 y > xy.y - 18 && y < xy.y + 18) {
+                if (wordSoFar) {
+                    // stroke from middle of last letter to middle of this one
+                    redraw();
+                    logAndExecute({ what: 'line', fromX: lastX, fromY: lastY,
+                        toX: xy.x, toY: xy.y });
+                }
                 addLetter(i);
+                lastX = xy.x;
+                lastY = xy.y;
                 return;
             }
+        }
+        // not in a letter, if draging pointer away from a letter,
+        // draw a line from that letter to the current position
+        if (wordSoFar) {
+            redraw();
+            execute({ what: 'line', fromX: lastX, fromY: lastY,
+                toX: x, toY: y });
         }
     };
 
@@ -73,6 +120,7 @@ function inputSeven(id, letters, onWord) {
         onWord(wordSoFar);
         down = false;
         used = [ false, false, false, false, false, false, false ];
+        opsLayer1 = [];
         wordSoFar = '';
         ctx1.clearRect(0, 0, $layer1.width, $layer1.height);
     };
