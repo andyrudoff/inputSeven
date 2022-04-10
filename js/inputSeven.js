@@ -19,6 +19,8 @@ function inputSeven(id, letters, onWord) {
     let wordSoFar = '';
     let lastX;
     let lastY;
+    let fadeInProgress = false;
+    let fadeAlpha = 1;
 
     ctx0.translate(radius, radius);
     radius = radius * 0.90
@@ -46,8 +48,8 @@ function inputSeven(id, letters, onWord) {
     };
 
     const execute = function(op) {
-		switch(op.what) {
-		case 'circle':
+        switch(op.what) {
+        case 'circle':
             ctx1.beginPath();
             ctx1.arc(op.x, op.y, 15, 0, 2 * Math.PI);
             ctx1.fillStyle = 'rgba(200, 128, 255, 0.3)';
@@ -79,11 +81,11 @@ function inputSeven(id, letters, onWord) {
 
     const addLetter = function(idx) {
         used[idx] = true;
-        console.log(`letter ${letters[idx]}`);
+        //console.log(`letter ${letters[idx]}`);
         const xy = loc[idx];
         logAndExecute({ what: 'circle', x: xy.x, y: xy.y });
         wordSoFar += letters[idx];
-        console.log(`addLetter, now word is: ${wordSoFar}`);
+        //console.log(`addLetter, now word is: ${wordSoFar}`);
         $word.innerHTML = wordSoFar;
     };
 
@@ -116,6 +118,18 @@ function inputSeven(id, letters, onWord) {
         }
     };
 
+    const fadeStep = function() {
+        if (fadeInProgress) {
+            if (fadeAlpha < 0.01) {
+                resetWord();
+                return;
+            }
+            fadeAlpha -= 0.03;
+            $word.style.color = `rgba(0, 0, 0, ${fadeAlpha})`;
+            setTimeout(fadeStep, 100);
+        }
+    };
+
     const endWord = function() {
         onWord(wordSoFar);
         down = false;
@@ -123,19 +137,28 @@ function inputSeven(id, letters, onWord) {
         opsLayer1 = [];
         wordSoFar = '';
         ctx1.clearRect(0, 0, $layer1.width, $layer1.height);
+        fadeInProgress = true;
+        fadeStep();
+    };
+
+    const resetWord = function() {
+        $word.innerHTML = '';
+        $word.style.color = 'black';
+        fadeInProgress = false;
+        fadeAlpha = 1;
     };
 
     // listen for mouse up
     $layer1.addEventListener('pointerup', function(event) {
         const xy = mouseXY(event);
-        console.log(`up ${xy.x} ${xy.y} word is "${wordSoFar}"`);
+        //console.log(`up ${xy.x} ${xy.y} word is "${wordSoFar}"`);
         endWord();
     });
 
     // listen for mouse out
     $layer1.addEventListener('pointerout', function(event) {
         const xy = mouseXY(event);
-        console.log(`out ${xy.x} ${xy.y}`);
+        //console.log(`out ${xy.x} ${xy.y}`);
         endWord();
     });
 
@@ -143,16 +166,16 @@ function inputSeven(id, letters, onWord) {
     $layer1.addEventListener('pointermove', function(event) {
         if (down) {
             const xy = mouseXY(event);
-            console.log(`move ${xy.x} ${xy.y}`);
+            //console.log(`move ${xy.x} ${xy.y}`);
             addXY(xy.x, xy.y);
         }
     });
 
     // listen for mouse down
     $layer1.addEventListener('pointerdown', function(event) {
-        $word.innerHTML = '';
+        resetWord();
         const xy = mouseXY(event);
-        console.log(`down ${xy.x} ${xy.y}`);
+        //console.log(`down ${xy.x} ${xy.y}`);
         down = true;
         addXY(xy.x, xy.y);
     });
