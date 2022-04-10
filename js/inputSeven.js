@@ -1,6 +1,18 @@
+// SPDX-License-Identifier: MIT
+//
+// Copyright 2022, Andy Rudoff. All rights reserved.
+//
+// inputSeven.js -- client-side js for inputSeven
+//
+
 "use strict";
 
+// inputSeven -- seven letter input widget
+//    id is the element in which to put thw widget (must class="input-seven")
+//    letters is an array of seven letters
+//    onWord is the callback, passed a word user inputs it
 function inputSeven(id, letters, onWord) {
+    // create the two-layer canvas, layer0 and layer1
     const $inputSeven = document.getElementById(id);
     $inputSeven.innerHTML = `
 <div id="input-seven-word"></div><br>
@@ -12,21 +24,28 @@ function inputSeven(id, letters, onWord) {
     const $layer1 = document.getElementById('input-seven-layer1');
     const ctx0 = $layer0.getContext('2d');
     const ctx1 = $layer1.getContext('2d');
+
+    //
+    // private widget state...
+    //
+
     let radius = $layer0.height / 2;
-    let down = false;
+    let down = false;   // true when mouse is down (finger is down on mobile)
+    // keep track of which letter in letters[] are "used up" so far
     let used = [ false, false, false, false, false, false, false ];
-    let opsLayer1 = [];
-    let wordSoFar = '';
-    let lastX;
-    let lastY;
-    let fadeInProgress = false;
-    let fadeAlpha = 1;
+    let opsLayer1 = []; // list of operations required to redraw layer1
+    let wordSoFar = ''; // the word input so far
+    let lastX;          // x coord of last letter added to word
+    let lastY;          // y coord of last letter added to word
+    let fadeInProgress = false; // true if currently fading out word
+    let fadeAlpha = 1;  // current alpha channel value for fade out
 
+    // translate to center of layer0 canvas and scale down radius a bit
     ctx0.translate(radius, radius);
-    radius = radius * 0.90
+    radius = radius * 0.90;
 
-    drawLetters(ctx0, radius, letters);
-
+    // fixed sized widget, so the center of each letter doesn't
+    // need to be calculated, we just fetch them from this table
     const loc = [
         { x: 101, y: 27 },   // letter 0
         { x: 157, y: 54 },   // letter 1
@@ -37,6 +56,42 @@ function inputSeven(id, letters, onWord) {
         { x: 45, y: 54 },    // letter 6
     ];
 
+    //
+    // define all our private methods used for this widget...
+    //
+
+    // draw the letters in seven equal distances around a circle
+    const drawLetters = function(ctx, radius, letters) {
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, 2*Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        let grad =
+            ctx.createRadialGradient(0, 0, radius * 0.95, 0, 0, radius * 1.05);
+        grad.addColorStop(0, '#333');
+        grad.addColorStop(0.5, 'white');
+        grad.addColorStop(1, '#333');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = radius * 0.1;
+        ctx.stroke();
+        ctx.fillStyle = 'black';
+
+        ctx.font = radius*0.25 + "px arial";
+        ctx.textBaseline="middle";
+        ctx.textAlign="center";
+        for (let n = 0; n < 7; n++){
+            const angle = n * Math.PI / 3.5;
+            ctx.rotate(angle);
+            ctx.translate(0, -radius*0.80);
+            ctx.rotate(-angle);
+            ctx.fillText(letters[n].toUpperCase(), 0, 0);
+            ctx.rotate(angle);
+            ctx.translate(0, radius*0.80);
+            ctx.rotate(-angle);
+        }
+    }
+
+    // calculate the mouse coordinates from raw event values
     const mouseXY = function(e) {
         const r = $layer0.getBoundingClientRect();
         const scaleX = $layer0.width / r.width;
@@ -47,6 +102,7 @@ function inputSeven(id, letters, onWord) {
         }
     };
 
+    // execute draw operations on layer1
     const execute = function(op) {
         switch(op.what) {
         case 'circle':
@@ -67,11 +123,13 @@ function inputSeven(id, letters, onWord) {
 
     };
 
+    // store operation (for redraw) and execute layer1 drawing operation
     const logAndExecute = function(op) {
         opsLayer1.push(op);
         execute(op);
     };
 
+    // clear layer1 and redraw using stored list of operations
     const redraw = function() {
         ctx1.clearRect(0, 0, $layer1.width, $layer1.height);
         for (const op of opsLayer1) {
@@ -79,6 +137,7 @@ function inputSeven(id, letters, onWord) {
         }
     };
 
+    // user dragged pointer over a letter, add it to the word
     const addLetter = function(idx) {
         used[idx] = true;
         //console.log(`letter ${letters[idx]}`);
@@ -89,6 +148,7 @@ function inputSeven(id, letters, onWord) {
         $word.innerHTML = wordSoFar;
     };
 
+    // process mouse coordinates, adding lines and letters as appropriate
     const addXY = function(x, y) {
         for (var i = 0; i < 7; i++) {
             if (used[i]) {
@@ -118,6 +178,7 @@ function inputSeven(id, letters, onWord) {
         }
     };
 
+    // advance the fade out of the word by one step, check if fade is done
     const fadeStep = function() {
         if (fadeInProgress) {
             if (fadeAlpha < 0.01) {
@@ -130,6 +191,7 @@ function inputSeven(id, letters, onWord) {
         }
     };
 
+    // end of inputting a word, use callback to pass it back to caller
     const endWord = function() {
         onWord(wordSoFar);
         down = false;
@@ -141,12 +203,21 @@ function inputSeven(id, letters, onWord) {
         fadeStep();
     };
 
+    // reset the word area to begin a new word
     const resetWord = function() {
         $word.innerHTML = '';
         $word.style.color = 'black';
         fadeInProgress = false;
         fadeAlpha = 1;
     };
+
+    //
+    // use the above methods to draw the inputSeven widget
+    // and handle all the input events...
+    //
+
+    // draw layer0
+    drawLetters(ctx0, radius, letters);
 
     // listen for mouse up
     $layer1.addEventListener('pointerup', function(event) {
@@ -179,33 +250,4 @@ function inputSeven(id, letters, onWord) {
         down = true;
         addXY(xy.x, xy.y);
     });
-}
-
-function drawLetters(ctx, radius, letters) {
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, 2*Math.PI);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    let grad = ctx.createRadialGradient(0, 0, radius * 0.95, 0, 0, radius * 1.05);
-    grad.addColorStop(0, '#333');
-    grad.addColorStop(0.5, 'white');
-    grad.addColorStop(1, '#333');
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = radius * 0.1;
-    ctx.stroke();
-    ctx.fillStyle = 'black';
-
-    ctx.font = radius*0.25 + "px arial";
-    ctx.textBaseline="middle";
-    ctx.textAlign="center";
-    for (let n = 0; n < 7; n++){
-        const angle = n * Math.PI / 3.5;
-        ctx.rotate(angle);
-        ctx.translate(0, -radius*0.80);
-        ctx.rotate(-angle);
-        ctx.fillText(letters[n].toUpperCase(), 0, 0);
-        ctx.rotate(angle);
-        ctx.translate(0, radius*0.80);
-        ctx.rotate(-angle);
-    }
 }

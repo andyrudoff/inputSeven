@@ -59,15 +59,21 @@ body {
     </div>
 
     <script>
-        // with lots of tapping on the input circle going on, it might be
-        // useful to disable double-tap-zoom.  this seems to work:
+        // not really part of the example, but useful:
+        // with lots of tapping on the input circle going on,
+        // prevent double-tap-zoom.
         document.addEventListener('dblclick', function(event) {
             event.preventDefault();
         }, { passive: false });
 
+        // create array of seven letters for this example
         const letters = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g' ];
+        // output area for callback to show list of words so far
         const $output = document.getElementById('output');
+
+        // create the inputSeven widget
         inputSeven('my-input', letters, (word) => {
+            // a word was input, add it to output area
             $output.appendChild(document.createTextNode(word + ' '));
         });
 
