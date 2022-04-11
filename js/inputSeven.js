@@ -193,7 +193,9 @@ function inputSeven(id, letters, onWord) {
 
     // end of inputting a word, use callback to pass it back to caller
     const endWord = function() {
-        onWord(wordSoFar);
+        if (wordSoFar) {
+            onWord(wordSoFar);
+        }
         down = false;
         used = [ false, false, false, false, false, false, false ];
         opsLayer1 = [];
